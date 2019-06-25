@@ -7,9 +7,12 @@ verify_ssl = true
 autopep8 = "*"
 flake8 = "*"
 ipython = "*"
+pytest = "*"
+pytest-cov = "*"
 
 [packages]
 torch-nightly = "==1.2.0.dev20190624"
+torch = "*"
 
 [requires]
 python_version = "3.7"
