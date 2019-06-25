@@ -38,6 +38,14 @@ class Dataset(IterableDataset):
     def window(self, window_size: int, shift: int = None) -> 'WindowDataset':
         return WindowDataset(self, window_size, shift)
 
+    def concat(self, *others: List['Dataset']) -> 'ConcatDataset':
+        return ConcatDataset(self, *others)
+
+    __add__ = concat
+
+    def zip(self, *others: List['Dataset']) -> 'ZipDataset':
+        return ZipDataset(self, *others)
+
     @staticmethod
     def range(n: int) -> 'RangeDataset':
         return RangeDataset(n)
@@ -160,3 +168,27 @@ class WindowDataset(Dataset):
             for _ in range(self._shift - i):
                 popleft()
         yield tuple(window)
+
+
+class ConcatDataset(Dataset):
+    def __init__(self, dataset: Dataset, *others: List[Dataset]) -> None:
+        assert isinstance(dataset, Dataset)
+        assert all(isinstance(d, Dataset) for d in others)
+
+        self._dataset = dataset
+        self._others = others
+
+    def __iter__(self):
+        yield from itertools.chain(self._dataset, *self._others)
+
+
+class ZipDataset(Dataset):
+    def __init__(self, dataset: Dataset, *others: List[Dataset]) -> None:
+        assert isinstance(dataset, Dataset)
+        assert all(isinstance(d, Dataset) for d in others)
+
+        self._dataset = dataset
+        self._others = others
+
+    def __iter__(self):
+        yield from zip(self._dataset, *self._others)
