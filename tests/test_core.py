@@ -72,3 +72,13 @@ class DatasetTestCase(TestCase):
     def test_window(self):
         for x, y in zip(chain.from_iterable(self.data.window(3, 3)), self.base):
             self.assertEqual(x, y)
+
+    def test_zip(self):
+        other = Dataset.range(100)
+        for x, i in zip(self.data.zip(other), self.base):
+            self.assertTupleEqual(x, (i, i))
+
+    def test_concat(self):
+        other = Dataset.range(100)
+        for x, y in zip(self.data.concat(other), chain(self.base, self.base)):
+            self.assertEqual(x, y)
