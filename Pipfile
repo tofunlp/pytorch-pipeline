@@ -1,0 +1,18 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+autopep8 = "*"
+flake8 = "*"
+ipython = "*"
+
+[packages]
+torch-nightly = "==1.2.0.dev20190624"
+
+[requires]
+python_version = "3.7"
+
+[pipenv]
+allow_prereleases = true
