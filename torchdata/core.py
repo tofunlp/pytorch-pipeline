@@ -145,7 +145,7 @@ class WindowDataset(Dataset):
 
         self._dataset = dataset
         self._window_size = window_size
-        self._shift = shift or 1
+        self._shift = shift or window_size
 
     def __iter__(self) -> Iterator[Any]:
         iterator = iter(self._dataset)
