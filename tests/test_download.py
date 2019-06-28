@@ -6,7 +6,7 @@ import unittest
 from unittest import mock
 
 
-from torchdata import download
+from torchpipe import download
 
 
 class TestSetCacheRoot(unittest.TestCase):

@@ -4,7 +4,7 @@ from itertools import chain
 
 from torch.utils.data import DataLoader
 
-from torchdata import TextDataset, ConcatTextDataset, ZipTextDataset
+from torchpipe import TextDataset, ConcatTextDataset, ZipTextDataset
 
 
 class TextDatasetTestCase(TestCase):

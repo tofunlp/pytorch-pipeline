@@ -1,7 +1,7 @@
 from unittest import TestCase
 from itertools import chain
 
-from torchdata import Dataset
+from torchpipe import Dataset
 
 
 class DatasetTestCase(TestCase):

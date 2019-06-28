@@ -5,7 +5,7 @@ import itertools
 
 from torch.utils.data import get_worker_info
 
-from torchdata import Dataset
+from torchpipe import Dataset
 
 
 class TextDataset(Dataset):
