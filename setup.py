@@ -23,7 +23,7 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
     ],
-    install_requires=['torch_nightly'],
+    install_requires=['numpy', 'torch_nightly'],
     dependency_links=[
         'https://download.pytorch.org/whl/nightly/cpu/torch_nightly.html',
         'https://download.pytorch.org/whl/nightly/cu90/torch_nightly.html',
