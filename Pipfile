@@ -11,11 +11,7 @@ pytest = "*"
 pytest-cov = "*"
 
 [packages]
-torch-nightly = "==1.2.0.dev20190624"
-torch = "*"
+numpy = "*"
 
 [requires]
 python_version = "3.7"
-
-[pipenv]
-allow_prereleases = true
