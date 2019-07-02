@@ -57,18 +57,6 @@ class DatasetTestCase(TestCase):
         n = 50
         self.assertListEqual(self.data.take(n), list(self.base[:n]))
 
-    def test_range_with_pytorch_dataloader(self):
-        from torch.utils.data import DataLoader
-        loader = DataLoader(self.data,
-                            batch_size=16,
-                            collate_fn=lambda x: x,
-                            shuffle=False,
-                            num_workers=2)
-        self.assertListEqual(
-            list(sorted(chain.from_iterable(loader))),
-            list(self.base)
-        )
-
     def test_window(self):
         for x, y in zip(chain.from_iterable(self.data.window(3, 3)), self.base):
             self.assertEqual(x, y)
@@ -82,3 +70,54 @@ class DatasetTestCase(TestCase):
         other = Dataset.range(100)
         for x, y in zip(self.data.concat(other), chain(self.base, self.base)):
             self.assertEqual(x, y)
+
+
+class RangeDatasetTestCase(TestCase):
+
+    def setUp(self):
+        self.end = 100
+
+    def test_dunder_init(self):
+        d1 = Dataset.range(self.end)
+        d2 = Dataset.range(50, self.end)
+        d3 = Dataset.range(0, self.end, 3)
+        self.assertTupleEqual(d1._args, (self.end,))
+        self.assertTupleEqual(d2._args, (50, self.end))
+        self.assertTupleEqual(d3._args, (0, self.end, 3))
+
+    def test_dunder_iter(self):
+        d1 = Dataset.range(self.end)
+        d2 = Dataset.range(50, self.end)
+        d3 = Dataset.range(0, self.end, 3)
+        self.assertListEqual(d1.all(), list(range(self.end)))
+        self.assertListEqual(d2.all(), list(range(50, self.end)))
+        self.assertListEqual(d3.all(), list(range(0, self.end, 3)))
+
+    def test_range_with_pytorch_dataloader(self):
+        from torch.utils.data import DataLoader
+
+        def get_loader(dataset):
+            return DataLoader(dataset,
+                              batch_size=16,
+                              collate_fn=lambda x: x,
+                              shuffle=False,
+                              num_workers=2)
+
+        d1 = Dataset.range(self.end)
+        d2 = Dataset.range(50, self.end)
+        d3 = Dataset.range(0, self.end, 3)
+        loader = get_loader(d1)
+        self.assertListEqual(
+            list(sorted(chain.from_iterable(loader))),
+            list(range(self.end))
+        )
+        loader = get_loader(d2)
+        self.assertListEqual(
+            list(sorted(chain.from_iterable(loader))),
+            list(range(50, self.end))
+        )
+        loader = get_loader(d3)
+        self.assertListEqual(
+            list(sorted(chain.from_iterable(loader))),
+            list(range(0, self.end, 3))
+        )
