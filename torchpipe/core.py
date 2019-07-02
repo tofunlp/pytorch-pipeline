@@ -147,26 +147,25 @@ class WindowDataset(Dataset):
         self._shift = shift or window_size
 
     def __iter__(self) -> Iterator[Any]:
-        iterator = iter(self._dataset)
-        window = collections.deque([], self._window_size)
+        shift = self._shift
+        window_size = self._window_size
+        window = collections.deque([], window_size)
         append = window.append
 
-        for _ in range(self._window_size):
-            append(next(iterator))
-        yield tuple(window)
-
-        i = 0
-        for x in iterator:
+        for i, x in enumerate(self._dataset, start=1):
             append(x)
-            i = (i + 1) % self._shift
-            if i % self._shift == 0:
+            if len(window) < window_size:
+                continue
+            elif i % shift == 0:
                 yield tuple(window)
 
-        if (i % self._shift) and (self._shift - i < self._window_size):
-            popleft = window.popleft
-            for _ in range(self._shift - i):
-                popleft()
-        yield tuple(window)
+        if window:
+            i = i % shift
+            if (i % shift) and (shift - i < window_size):
+                popleft = window.popleft
+                for _ in range(shift - i):
+                    popleft()
+            yield tuple(window)
 
 
 class ConcatDataset(Dataset):
