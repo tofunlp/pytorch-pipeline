@@ -1,5 +1,4 @@
-from typing import Any, Iterator, Iterable, List, Callable
-import math
+from typing import Any, Iterator, Iterable, Tuple, List, Callable
 import random
 import itertools
 import collections
@@ -47,8 +46,8 @@ class Dataset(IterableDataset):
         return ZipDataset(self, *others)
 
     @staticmethod
-    def range(n: int) -> 'RangeDataset':
-        return RangeDataset(n)
+    def range(*args: Tuple[int]) -> 'RangeDataset':
+        return RangeDataset(*args)
 
 
 class ApplyDataset(Dataset):
@@ -124,19 +123,19 @@ class ShuffleDataset(Dataset):
 
 
 class RangeDataset(Dataset):
-    def __init__(self, n: int) -> None:
-        self._n = n
+    def __init__(self, *args: Tuple[int]) -> None:
+        self._args = args
 
     def __iter__(self) -> Iterator[int]:
         worker_info = get_worker_info()
         if worker_info is None:
-            yield from range(self._n)
+            yield from range(*self._args)
         else:
-            per_worker = math.ceil(self._n / worker_info.num_workers)
-            worker_id = worker_info.id
-            start = worker_id * per_worker
-            end = min(start + per_worker, self._n)
-            yield from range(start, end)
+            base = range(*self._args)
+            start = base.start
+            end = base.stop
+            step = base.step
+            yield from range(start + step * worker_info.id, end, step * worker_info.num_workers)
 
 
 class WindowDataset(Dataset):
