@@ -149,22 +149,25 @@ class WindowDataset(Dataset):
     def __iter__(self) -> Iterator[Any]:
         shift = self._shift
         window_size = self._window_size
+        iterator = iter(self._dataset)
         window = collections.deque([], window_size)
         append = window.append
 
-        for i, x in enumerate(self._dataset, start=1):
+        for _, x in zip(range(window_size), iterator):
             append(x)
-            if len(window) < window_size:
-                continue
-            elif i % shift == 0:
+        yield tuple(window)
+
+        i = 0
+        for x in iterator:
+            append(x)
+            i = (i + 1) % shift
+            if i % shift == 0:
                 yield tuple(window)
 
-        if window:
-            i = i % shift
-            if (i % shift) and (shift - i < window_size):
-                popleft = window.popleft
-                for _ in range(shift - i):
-                    popleft()
+        if (i % shift) and (shift - i < window_size):
+            popleft = window.popleft
+            for _ in range(shift - i):
+                popleft()
             yield tuple(window)
 
 
