@@ -1,7 +1,12 @@
 from unittest import TestCase
+import tempfile
 from itertools import chain
 
+import easyfile
+from torch.utils.data import DataLoader
+
 from torchpipe import Dataset
+from torchpipe.core import SequenceDataset, EasyfileDataset
 
 
 class DatasetTestCase(TestCase):
@@ -9,6 +14,20 @@ class DatasetTestCase(TestCase):
     def setUp(self):
         self.base = range(100)
         self.data = Dataset.range(100)
+
+    def test_dunder_iter(self):
+        dataset = Dataset(self.base)
+        for _ in range(100):
+            for x, y in zip(dataset, self.base):
+                self.assertEqual(x, y)
+
+    def test_iterates_with_dataloader(self):
+        loader = DataLoader(Dataset(self.base),
+                            batch_size=16,
+                            num_workers=2,
+                            collate_fn=lambda x: x)
+        self.assertSequenceEqual(sorted(x for batch in loader for x in batch),
+                                 self.base)
 
     def test_apply(self):
         def f(it):
@@ -72,6 +91,53 @@ class DatasetTestCase(TestCase):
             self.assertEqual(x, y)
 
 
+class SequenceDatasetTestCase(TestCase):
+
+    def setUp(self):
+        self.base = list(range(100))
+        self.data = SequenceDataset(self.base)
+
+    def test_dunder_iter(self):
+        for x, y in zip(self.data, self.base):
+            self.assertEqual(x, y)
+
+    def test_iterates_with_dataloader(self):
+        dataset = DataLoader(self.data,
+                             batch_size=16,
+                             num_workers=2,
+                             shuffle=False,
+                             collate_fn=lambda x: x)
+        self.assertSequenceEqual(sorted(x for batch in dataset for x in batch),
+                                 self.base)
+
+
+class EasyfileDatasetTestCase(TestCase):
+
+    def setUp(self):
+        self.fp = tempfile.NamedTemporaryFile()
+        self.n = 100
+        for i in range(self.n):
+            self.fp.write(f'line #{str(i).zfill(3)}\n'.encode('utf-8'))
+        self.fp.seek(0)
+        self.data = EasyfileDataset(easyfile.TextFile(self.fp.name))
+
+    def tearDown(self):
+        self.fp.close()
+
+    def test_dunder_iter(self):
+        for i, x in enumerate(self.data):
+            self.assertEqual(x, f'line #{str(i).zfill(3)}')
+
+    def test_iterates_with_dataloader(self):
+        dataset = DataLoader(self.data,
+                             batch_size=16,
+                             num_workers=2,
+                             shuffle=False,
+                             collate_fn=lambda x: x)
+        for i, x in enumerate(sorted(x for batch in dataset for x in batch)):
+            self.assertEqual(x, f'line #{str(i).zfill(3)}')
+
+
 class RangeDatasetTestCase(TestCase):
 
     def setUp(self):
@@ -94,8 +160,6 @@ class RangeDatasetTestCase(TestCase):
         self.assertListEqual(d3.all(), list(range(0, self.end, 3)))
 
     def test_range_with_pytorch_dataloader(self):
-        from torch.utils.data import DataLoader
-
         def get_loader(dataset):
             return DataLoader(dataset,
                               batch_size=16,

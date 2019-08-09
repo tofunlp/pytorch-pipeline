@@ -12,6 +12,7 @@ pytest-cov = "*"
 
 [packages]
 torch = "*"
+lineflow = "*"
 
 [requires]
 python_version = "3.7"
