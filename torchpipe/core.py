@@ -1,13 +1,33 @@
 from typing import Any, Iterator, Iterable, Tuple, List, Callable
+import _collections_abc
+import math
 import random
 import itertools
-import collections
 
+import easyfile
+import lineflow as lf
 from torch.utils.data import IterableDataset
 from torch.utils.data import get_worker_info
 
 
 class Dataset(IterableDataset):
+    def __init__(self, dataset: Iterable[Any]) -> None:
+        assert isinstance(dataset, _collections_abc.Iterable)
+        self._dataset = dataset
+
+    def __iter__(self) -> Iterator[Any]:
+        worker_info = get_worker_info()
+        print(worker_info)
+        it, self._dataset = itertools.tee(self._dataset)
+        if worker_info is None:
+            yield from it
+        else:
+            worker_id = worker_info.id
+            num_workers = worker_info.num_workers
+            for i, x in enumerate(it):
+                if i % num_workers == worker_id:
+                    yield x
+
     def all(self) -> List[Any]:
         return list(self)
 
@@ -50,6 +70,44 @@ class Dataset(IterableDataset):
         return RangeDataset(*args)
 
 
+class EasyfileDataset(Dataset):
+    def __init__(self, dataset: easyfile.TextFile) -> None:
+        assert isinstance(dataset, easyfile.TextFile)
+
+        self._dataset = dataset
+
+    def __iter__(self):
+        worker_info = get_worker_info()
+        if worker_info is None:
+            yield from self._dataset
+        else:
+            worker_id = worker_info.id
+            num_workers = worker_info.num_workers
+            span = math.ceil(len(self._dataset) / num_workers)
+            start = span * worker_id
+            end = span * (worker_id + 1)
+            yield from self._dataset.iterate(start, end)
+
+
+class SequenceDataset(Dataset):
+    def __init__(self, dataset: lf.core.DatasetMixin) -> None:
+        assert isinstance(dataset, lf.core.DatasetMixin)
+
+        self._dataset = dataset
+
+    def __iter__(self):
+        worker_info = get_worker_info()
+        if worker_info is None:
+            yield from self._dataset
+        else:
+            worker_id = worker_info.id
+            num_workers = worker_info.num_workers
+            span = math.ceil(len(self._dataset) / num_workers)
+            start = span * worker_id
+            end = span * (worker_id + 1)
+            yield from self._dataset[start:end]
+
+
 class ApplyDataset(Dataset):
     def __init__(self,
                  dataset: Dataset,
@@ -79,7 +137,7 @@ class MapDataset(Dataset):
 
 class FlatMapDataset(MapDataset):
     def __iter__(self) -> Iterator[Any]:
-        yield from itertools.chain.from_iterable(map(self._map_func, self._dataset))
+        yield from lf.flat_map(self._map_func, self._dataset, lazy=True)
 
 
 class FilterDataset(Dataset):
@@ -91,7 +149,7 @@ class FilterDataset(Dataset):
         self._dataset = dataset
 
     def __iter__(self) -> Iterator[Any]:
-        yield from filter(self._predicate, self._dataset)
+        yield from lf.filter(self._predicate, self._dataset, lazy=True)
 
 
 class ShuffleDataset(Dataset):
@@ -147,28 +205,7 @@ class WindowDataset(Dataset):
         self._shift = shift or window_size
 
     def __iter__(self) -> Iterator[Any]:
-        shift = self._shift
-        window_size = self._window_size
-        iterator = iter(self._dataset)
-        window = collections.deque([], window_size)
-        append = window.append
-
-        for _, x in zip(range(window_size), iterator):
-            append(x)
-        yield tuple(window)
-
-        i = 0
-        for x in iterator:
-            append(x)
-            i = (i + 1) % shift
-            if i % shift == 0:
-                yield tuple(window)
-
-        if (i % shift) and (shift - i < window_size):
-            popleft = window.popleft
-            for _ in range(shift - i):
-                popleft()
-            yield tuple(window)
+        yield from lf.window(self._dataset, self._window_size, self._shift, lazy=True)
 
 
 class ConcatDataset(Dataset):
