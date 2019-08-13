@@ -17,7 +17,6 @@ class Dataset(IterableDataset):
 
     def __iter__(self) -> Iterator[Any]:
         worker_info = get_worker_info()
-        print(worker_info)
         it, self._dataset = itertools.tee(self._dataset)
         if worker_info is None:
             yield from it
