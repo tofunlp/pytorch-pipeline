@@ -6,7 +6,6 @@ import easyfile
 from torch.utils.data import DataLoader
 
 from torchpipe import Dataset
-from torchpipe.core import SequenceDataset, EasyfileDataset
 
 
 class DatasetTestCase(TestCase):
@@ -58,6 +57,20 @@ class DatasetTestCase(TestCase):
         for x, y in zip(self.data.flat_map(f), chain.from_iterable(map(f, self.base))):
             self.assertEqual(x, y)
 
+    def test_bucket(self):
+        for i, x in enumerate(self.data.bucket(3)):
+            self.assertEqual(x, list(self.base[i * 3: i * 3 + 3]))
+
+    def test_sorts_data_with_buffer(self):
+        expected = chain.from_iterable(reversed(self.base[i: i + 3])
+                                       for i in range(0, len(self.base), 3))
+        for x, y in zip(self.data.sort(lambda x: -x, 3),  expected):
+            self.assertEqual(x, y)
+
+    def test_sorts_data_without_buffer(self):
+        for x, y in zip(self.data.sort(lambda x: -x),  reversed(self.base)):
+            self.assertEqual(x, y)
+
     def test_shuffles_data_with_buffer(self):
         for x, y in zip(sorted(self.data.shuffle(3)), self.base):
             self.assertEqual(x, y)
@@ -91,11 +104,31 @@ class DatasetTestCase(TestCase):
             self.assertEqual(x, y)
 
 
+class IterableDatasetTestCase(TestCase):
+
+    def setUp(self):
+        self.base = iter(range(100))
+        self.data = Dataset(iter(range(100)))
+
+    def test_dunder_iter(self):
+        for x, y in zip(self.data, self.base):
+            self.assertEqual(x, y)
+
+    def test_iterates_with_dataloader(self):
+        dataset = DataLoader(self.data,
+                             batch_size=16,
+                             num_workers=2,
+                             shuffle=False,
+                             collate_fn=lambda x: x)
+        for x, y in zip(sorted(x for batch in dataset for x in batch), self.base):
+            self.assertEqual(x, y)
+
+
 class SequenceDatasetTestCase(TestCase):
 
     def setUp(self):
         self.base = list(range(100))
-        self.data = SequenceDataset(self.base)
+        self.data = Dataset(self.base)
 
     def test_dunder_iter(self):
         for x, y in zip(self.data, self.base):
@@ -119,7 +152,7 @@ class EasyfileDatasetTestCase(TestCase):
         for i in range(self.n):
             self.fp.write(f'line #{str(i).zfill(3)}\n'.encode('utf-8'))
         self.fp.seek(0)
-        self.data = EasyfileDataset(easyfile.TextFile(self.fp.name))
+        self.data = Dataset(easyfile.TextFile(self.fp.name))
 
     def tearDown(self):
         self.fp.close()
