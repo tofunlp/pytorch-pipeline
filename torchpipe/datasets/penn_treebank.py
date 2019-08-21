@@ -1,8 +1,8 @@
 import lineflow.datasets as lfds
 
-from torchpipe.core import SequenceDataset
+from torchpipe import Dataset
 
 
-class PennTreebank(SequenceDataset):
+class PennTreebank(Dataset):
     def __init__(self, split='train') -> None:
         super(PennTreebank, self).__init__(lfds.get_penn_treebank()[split])
