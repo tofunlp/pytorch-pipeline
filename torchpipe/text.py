@@ -24,10 +24,9 @@ class TextDataset(Dataset):
         else:
             worker_id = worker_info.id
             num_workers = worker_info.num_workers
-            with io.open(self._path, 'rb') as fp:
-                for i, line in enumerate(fp):
-                    if i % num_workers == worker_id:
-                        yield line.decode(self._encoding).rstrip(os.linesep)
+            with io.open(self._path, 'rt', encoding=self._encoding) as fp:
+                for line in itertools.islice(fp, worker_id, None, num_workers):
+                    yield line.rstrip(os.linesep)
 
 
 class ConcatTextDataset(Dataset):
@@ -46,10 +45,10 @@ class ConcatTextDataset(Dataset):
         else:
             worker_id = worker_info.id
             num_workers = worker_info.num_workers
-            fps = [io.open(p, 'rb') for p in self._paths]
-            for i, line in enumerate(itertools.chain(*fps)):
-                if i % num_workers == worker_id:
-                    yield line.decode(self._encoding).rstrip(os.linesep)
+            fps = [io.open(p, 'rt', encoding=self._encoding) for p in self._paths]
+            for line in itertools.islice((itertools.chain(*fps)),
+                                         worker_id, None, num_workers):
+                yield line.rstrip(os.linesep)
         for fp in fps:
             fp.close()
 
@@ -70,10 +69,8 @@ class ZipTextDataset(Dataset):
         else:
             worker_id = worker_info.id
             num_workers = worker_info.num_workers
-            fps = [io.open(p, 'rb') for p in self._paths]
-            for i, lines in enumerate(zip(*fps)):
-                if i % num_workers == worker_id:
-                    yield tuple(line.decode(self._encoding).rstrip(os.linesep)
-                                for line in lines)
+            fps = [io.open(p, 'rt', encoding=self._encoding) for p in self._paths]
+            for lines in itertools.islice(zip(*fps), worker_id, None, num_workers):
+                yield tuple(line.rstrip(os.linesep) for line in lines)
         for fp in fps:
             fp.close()
