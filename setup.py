@@ -22,6 +22,7 @@ setup(
     classifiers=[
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ],
-    install_requires=['torch', 'lineflow'],
+    install_requires=['torch>=1.2.0', 'lineflow'],
 )
