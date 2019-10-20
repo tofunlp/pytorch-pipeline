@@ -35,7 +35,7 @@ from torch.utils.data import DataLoader
 import torchpipe as tp
 
 
-d = tp.Dataset(range(1_000)).shuffle(100).batch(10)
+d = tp.Dataset(range(1_000)).parallel().shuffle(100).batch(10)
 loader = DataLoader(d, num_workers=4, collate_fn=lambda x: x)
 for x in loader:
     ...
