@@ -64,10 +64,10 @@
         },
         "lineflow": {
             "hashes": [
-                "sha256:b1d22669ce7942adf3c2b805ecfa6148af024ee5857b46afd098ce6c2e7715d5"
+                "sha256:828b9daafb94d8110bfa2c1f23d5caf96a89674f26b2c69baf3711aad48b3bb1"
             ],
             "index": "pypi",
-            "version": "==0.6.2"
+            "version": "==0.6.3"
         },
         "numpy": {
             "hashes": [
@@ -347,10 +347,10 @@
         },
         "pyparsing": {
             "hashes": [
-                "sha256:6f98a7b9397e206d78cc01df10131398f1c8b8510a2f4d97d9abd82e1aacdd80",
-                "sha256:d9338df12903bbf5d65a0e4e87c2161968b10d2e489652bb47001d82a9b028b4"
+                "sha256:0961bf3429691b9cd7e3695a37ee8bc18e95c56ac1271dc2bbc41697062d1b6d",
+                "sha256:8997c62f779045b07273e124bbe1d03e2eebb9a38a7ef0798fea4bae72b4b6a3"
             ],
-            "version": "==2.4.2"
+            "version": "==2.4.3"
         },
         "pytest": {
             "hashes": [
