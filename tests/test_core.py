@@ -3,7 +3,7 @@ from itertools import chain
 
 from torch.utils.data import DataLoader
 
-from torchpipe import Dataset
+from pytorch_pipeline import Dataset
 
 
 class DatasetTestCase(TestCase):

@@ -1,6 +1,6 @@
-# Torchpipe: Simple ETL Pipeline for PyTorch
+# PyTorch Pipeline: Simple ETL Pipeline for PyTorch
 
-Torchpipe is a simple ETL framework, especially for PyTorch.
+PyTorch Pipeline is a simple ETL framework for PyTorch.
 It is an alternative to [tf.data](https://www.tensorflow.org/api_docs/python/tf/data) in TensorFlow
 
 
@@ -12,30 +12,30 @@ It is an alternative to [tf.data](https://www.tensorflow.org/api_docs/python/tf/
 
 # Installation
 
-To install Torchpipe:
+To install PyTorch Pipeline:
 
 ```bash
-pip install torchpipe
+pip install pytorch_pipeilne
 ```
 
 
 # Basic Usage
 
 ```py
-import torchpipe as tp
+import pytorch_pipeilne as pp
 
-d = tp.Dataset(range(1_000))
-d.shuffle(buffer_size=100).batch(batch_size=10).first() # [4, 44, 71, 92, 97, 86, 43, 57, 60, 62]
+d = pp.TextDataset('/path/to/your/text')
+d.shuffle(buffer_size=100).batch(batch_size=10).first()
 ```
 
 # Usage with PyTorch
 
 ```py
 from torch.utils.data import DataLoader
-import torchpipe as tp
+import pytorch_pipeilne as pp
 
 
-d = tp.Dataset(range(1_000)).parallel().shuffle(100).batch(10)
+d = pp.Dataset(range(1_000)).parallel().shuffle(100).batch(10)
 loader = DataLoader(d, num_workers=4, collate_fn=lambda x: x)
 for x in loader:
     ...
@@ -43,16 +43,16 @@ for x in loader:
 
 # Usage with LineFlow
 
-You can use Torchpipe with pre-defined datasets in [LineFlow](https://github.com/tofunlp/lineflow):
+You can use PyTorch Pipeline with pre-defined datasets in [LineFlow](https://github.com/tofunlp/lineflow):
 
 ```py
 from torch.utils.data import DataLoader
 from lineflow.datasets.wikitext import cached_get_wikitext
-import torchpipe as tp
+import pytorch_pipeilne as pp
 
 dataset = cached_get_wikitext('wikitext-2')
 # Preprocessing dataset
-train_data = tp.Dataset(dataset['train']) \
+train_data = pp.Dataset(dataset['train']) \
     .flat_map(lambda x: x.split() + ['<eos>']) \
     .window(35) \
     .parallel() \
