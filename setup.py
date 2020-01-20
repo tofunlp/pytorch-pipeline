@@ -6,17 +6,17 @@ except ImportError:
 
 
 setup(
-    name='torchpipe',
+    name='pytorch_pipeline',
     use_scm_version=True,
     setup_requires=['setuptools_scm'],
     description='Simple ETL Pipeline for PyTorch',
     long_description=open('./README.md', encoding='utf-8').read(),
     long_description_content_type='text/markdown',
-    url='https://github.com/yasufumy/torchpipe',
+    url='https://github.com/yasufumy/pytorch-pipeline',
     author='Yasufumi Taniguchi',
     author_email='yasufumi.taniguchi@gmail.com',
     packages=[
-        'torchpipe'
+        'pytorch_pipeline'
     ],
     license='MIT',
     classifiers=[

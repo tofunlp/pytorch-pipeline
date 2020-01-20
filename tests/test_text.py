@@ -4,7 +4,7 @@ from itertools import chain
 
 from torch.utils.data import DataLoader
 
-from torchpipe import TextDataset
+from pytorch_pipeline import TextDataset
 
 
 class TextDatasetTestCase(TestCase):

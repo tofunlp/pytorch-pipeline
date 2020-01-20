@@ -2,7 +2,7 @@ from typing import Iterator
 import os
 import io
 
-from torchpipe import Dataset
+from pytorch_pipeline import Dataset
 
 
 class TextDataset(Dataset):

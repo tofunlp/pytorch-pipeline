@@ -13,6 +13,7 @@ pytest-cov = "*"
 [packages]
 torch = ">=1.2.0"
 lineflow = "*"
+numpy = "*"
 
 [requires]
 python_version = "3.7"
