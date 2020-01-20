@@ -6,7 +6,7 @@ except ImportError:
 
 
 setup(
-    name='pytorch_pipeline',
+    name='pytorch-pipeline',
     use_scm_version=True,
     setup_requires=['setuptools_scm'],
     description='Simple ETL Pipeline for PyTorch',
