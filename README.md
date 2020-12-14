@@ -15,14 +15,14 @@ It is an alternative to [tf.data](https://www.tensorflow.org/api_docs/python/tf/
 To install PyTorch Pipeline:
 
 ```bash
-pip install pytorch_pipeilne
+pip install pytorch_pipeline
 ```
 
 
 # Basic Usage
 
 ```py
-import pytorch_pipeilne as pp
+import pytorch_pipeline as pp
 
 d = pp.TextDataset('/path/to/your/text')
 d.shuffle(buffer_size=100).batch(batch_size=10).first()
@@ -32,7 +32,7 @@ d.shuffle(buffer_size=100).batch(batch_size=10).first()
 
 ```py
 from torch.utils.data import DataLoader
-import pytorch_pipeilne as pp
+import pytorch_pipeline as pp
 
 
 d = pp.Dataset(range(1_000)).parallel().shuffle(100).batch(10)
@@ -48,7 +48,7 @@ You can use PyTorch Pipeline with pre-defined datasets in [LineFlow](https://git
 ```py
 from torch.utils.data import DataLoader
 from lineflow.datasets.wikitext import cached_get_wikitext
-import pytorch_pipeilne as pp
+import pytorch_pipeline as pp
 
 dataset = cached_get_wikitext('wikitext-2')
 # Preprocessing dataset
